@@ -1,24 +1,33 @@
-import React from 'react';
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
 import './App.css';
 
-function App() {
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+}
+
+function pickColor() {
+  const colors = ['gold', 'royalblue', 'tomato', 'teal', 'darkgrey'];
+  return colors[getRandomInt(0, colors.length)];
+}
+
+function App(worker) {
+  const [bgColor, setBgColor] = useState('tomato');
+
+  useEffect(() => {
+    return () => {
+    };
+  });
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="app grid-container" style={{ background: bgColor }}>
+      <div className="A">
+        <button style={{ background: bgColor }} onClick={() => setBgColor(pickColor())}> Change State </button>
+      </div>
+      <div className="B">
+        <button style={{ background: bgColor }} onClick={() => {}}> Unsubscribe </button>
+      </div>
     </div>
   );
 }
