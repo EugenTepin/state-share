@@ -8,25 +8,46 @@ function getRandomInt(min, max) {
 }
 
 function pickColor() {
-  const colors = ['gold', 'royalblue', 'tomato', 'teal', 'darkgrey'];
+  const colors = ['gold', 'royalblue', 'tomato', 'teal', 'darkgrey', 'firebrick', 'mediumspringgreen', 'mediumslateblue', 'indigo', 'maroon'];
   return colors[getRandomInt(0, colors.length)];
 }
 
-function App(worker) {
+function App() {
   const [bgColor, setBgColor] = useState('tomato');
+  const [subscribed, setSubscription] = useState(true);
+
+  function dispatchState() {
+    const color = pickColor();
+    setBgColor(color);
+    window.localStorage.setItem('color', JSON.stringify({ value: color }));
+  }
+
+  const handler = (e) => {
+    const { value } = JSON.parse(e.newValue);
+    setBgColor(value)
+  };
+
+  const unsubscribe = () => {
+    window.removeEventListener('storage', handler);
+    setSubscription(false);
+  }
 
   useEffect(() => {
-    return () => {
-    };
+    if (subscribed) {
+      window.addEventListener('storage', handler);
+      return () => {
+        window.removeEventListener('storage', handler);
+      };
+    }
   });
 
   return (
     <div className="app grid-container" style={{ background: bgColor }}>
       <div className="A">
-        <button style={{ background: bgColor }} onClick={() => setBgColor(pickColor())}> Change State </button>
+        <button style={{ background: bgColor }} onClick={() => dispatchState()}> Change State </button>
       </div>
       <div className="B">
-        <button style={{ background: bgColor }} onClick={() => {}}> Unsubscribe </button>
+        <button style={{ background: bgColor }} onClick={() => unsubscribe()}> Unsubscribe </button>
       </div>
     </div>
   );
