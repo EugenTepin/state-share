@@ -41,7 +41,7 @@ function App() {
         navigator.serviceWorker.removeEventListener('message', handler);
       }
     }
-  });
+  },[]);
 
   return (
     <div className="app grid-container" style={{ background: bgColor }}>
