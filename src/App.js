@@ -39,7 +39,7 @@ function App() {
         window.removeEventListener('storage', handler);
       };
     }
-  });
+  },[]);
 
   return (
     <div className="app grid-container" style={{ background: bgColor }}>
