@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 function getRandomInt(min, max) {
@@ -14,7 +14,6 @@ function pickColor() {
 
 function App() {
   const [bgColor, setBgColor] = useState('tomato');
-  const [subscribed, setSubscription] = useState(true);
 
   function dispatchState() {
     const color = pickColor();
@@ -22,24 +21,21 @@ function App() {
     window.localStorage.setItem('color', JSON.stringify({ value: color }));
   }
 
-  const handler = (e) => {
+  const listenState = useCallback((e) => {
     const { value } = JSON.parse(e.newValue);
     setBgColor(value)
-  };
+  }, []);
 
   const unsubscribe = () => {
-    window.removeEventListener('storage', handler);
-    setSubscription(false);
+    window.removeEventListener('storage', listenState);
   }
 
   useEffect(() => {
-    if (subscribed) {
-      window.addEventListener('storage', handler);
-      return () => {
-        window.removeEventListener('storage', handler);
-      };
-    }
-  },[]);
+    window.addEventListener('storage', listenState);
+    return () => {
+      window.removeEventListener('storage', listenState);
+    };
+  }, [listenState]);
 
   return (
     <div className="app grid-container" style={{ background: bgColor }}>
