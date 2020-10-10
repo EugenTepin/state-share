@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.css';
 
 function getRandomInt(min, max) {
@@ -14,29 +14,24 @@ function pickColor() {
 
 function App() {
   const [bgColor, setBgColor] = useState('tomato');
-  const [subscribed, setSubscription] = useState(true);
-  const bc = new BroadcastChannel('shared_state');
-  function dispatchState() {
+  const { current: bChannel } = useRef(new BroadcastChannel('shared_state'));
+  const dispatchState = () => {
     const color = pickColor();
     setBgColor(color);
-    bc.postMessage({color});
-  }
+    bChannel.postMessage({ color });
+  };
 
-  function unsubscribe() {
-    setSubscription(false);
-    bc.close();
-  }
+  const listenState = useCallback(({ data }) => {
+    setBgColor(data.color);
+  }, []);
 
   useEffect(() => {
-    if(subscribed){
-      bc.onmessage = ({data}) => {
-        setBgColor(data.color);
-      };
-      return () => {
-        bc.close();
-      };
-    }
-  });
+    bChannel.addEventListener('message', listenState)
+    return () => {
+      bChannel.removeEventListener('message', listenState);
+      bChannel.close();
+    };
+  }, [listenState, bChannel]);
 
   return (
     <div className="app grid-container" style={{ background: bgColor }}>
@@ -44,7 +39,7 @@ function App() {
         <button style={{ background: bgColor }} onClick={() => dispatchState()}> Change State </button>
       </div>
       <div className="B">
-        <button style={{ background: bgColor }} onClick={() => unsubscribe()}> Unsubscribe </button>
+        <button style={{ background: bgColor }} onClick={() => { bChannel.removeEventListener('message', listenState) }}> Unsubscribe </button>
       </div>
     </div>
   );
