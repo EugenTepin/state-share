@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import './App.css';
 
 function getRandomInt(min, max) {
@@ -14,7 +14,6 @@ function pickColor() {
 
 function App() {
   const [bgColor, setBgColor] = useState('tomato');
-  const [subscribed, setSubscription] = useState(true);
 
   function dispatchState() {
     const color = pickColor();
@@ -24,24 +23,20 @@ function App() {
     });
   }
 
-  const handler = (event) => {
-    setBgColor(event.data.color);
-    console.log(`color: ${event.data.color}`);
-  };
-
   function unsubscribe() {
-    navigator.serviceWorker.removeEventListener('message', handler);
-    setSubscription(false);
+    navigator.serviceWorker.removeEventListener('message', listenState);
   }
 
+  const listenState = useCallback((event) => {
+    setBgColor(event.data.color);
+  }, []);
+
   useEffect(() => {
-    if (subscribed) {
-      navigator.serviceWorker.addEventListener('message', handler);
-      return () => {
-        navigator.serviceWorker.removeEventListener('message', handler);
-      }
+    navigator.serviceWorker.addEventListener('message', listenState);
+    return () => {
+      navigator.serviceWorker.removeEventListener('message', listenState);
     }
-  },[]);
+  }, [listenState]);
 
   return (
     <div className="app grid-container" style={{ background: bgColor }}>
